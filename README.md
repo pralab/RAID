@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 ## Dataset Setup
 
-First download the [ELSA D3 dataset](https://huggingface.co/datasets/elsaEU/ELSA_D3) (or a subset):
+First, create a directory `data` in the project root folder and download the [ELSA D3 dataset](https://huggingface.co/datasets/elsaEU/ELSA_D3) (or a subset):
 ```
 python src/raid/scripts/elsa_downloader.py --split train --amount 200_000
 python src/raid/scripts/elsa_downloader.py --split val
@@ -41,7 +41,7 @@ data
 Then run the ```train_detectors.sh``` script
 
 # Evaluating and attacking a detector
-First, download the model checkpoints for the different detectors, which you can find [here](https://huggingface.co/aimagelab/RAID_ckpt)!
+First, create a directory `ckpt` in the project root folder and download the model checkpoints for the different detectors into it, which you can find [here](https://huggingface.co/aimagelab/RAID_ckpt)!
 Then, proceed to download the RAID dataset from the following [link](https://huggingface.co/datasets/aimagelab/RAID) and check that the structure matches the one below:
 
 ```
