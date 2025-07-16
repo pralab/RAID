@@ -87,6 +87,9 @@ data
   --output_dir           directory where the evaluation results are saved
 ```
 
+## Evaluating and attacking additional detectors
+[Evaluating and attacking an new detector](src/raid/models/example_model/model_wrapping.Md)
+
 # File Structure
 
 - ```raid/attacks/```: Directory containing the code for the ensemble attack and the used trackers and losses
