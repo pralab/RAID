@@ -10,7 +10,7 @@ from .chen2024_preprocess import Chen2024PreProcess
 
 
 def chen2024(checkpoint_path: str, device: Union[str, torch.device] = "cpu"):
-    if "convnext_base_in22k" in checkpoint_path:
+    if "convnext" in checkpoint_path:
         model_name = "convnext_base_in22k"
     else:
         model_name = "clip-ViT-L-14"
