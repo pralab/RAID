@@ -100,7 +100,7 @@ def def_model(arch, model_path, localize=False):
         num_ftrs = model.fc.in_features
         model.fc = torch.nn.Linear(num_ftrs, 1)
     elif arch == 'res50stride1':
-        import detectors_code.corvi2023.networks.resnet_mod as resnet_mod
+        import external.corvi2023.networks.resnet_mod as resnet_mod
 # Change gap size to None instead of 1 to obtain proper pooling-applied output
         model = resnet_mod.resnet50(num_classes=1, gap_size=None, stride0=1)
     else:

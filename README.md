@@ -12,6 +12,8 @@ pip install -r requirements.txt
 
 # Detector Training
 
+If you want to use the available pretrained models, you can directly skip to the next [step](#evaluating-and-attacking-a-detector).
+
 ## Dataset Setup
 
 First, create a directory `data` in the project root folder and download the [ELSA D3 dataset](https://huggingface.co/datasets/elsaEU/ELSA_D3) (or a subset):
@@ -38,11 +40,14 @@ data
             |      .
 ``` 
 
-Then run the ```train_detectors.sh``` script
+## Training
+The ```train_detectors.sh``` file contains all the training scripts to be launched.
+You need to uncomment the lines corresponding to the detectors you want to train before launching it.
+Additionally, to use the new generated checkpoints, you have to modify the `constants.py` file to have,
+for each model inside the `MODELS` dictionary, the respective checkpoint path.
 
 # Evaluating and attacking a detector
-First, create a directory `ckpt` in the project root folder and download the model checkpoints for the different detectors into it, which you can find [here](https://huggingface.co/aimagelab/RAID_ckpt)!
-Then, proceed to download the RAID dataset from the following [link](https://huggingface.co/datasets/aimagelab/RAID) and check that the structure matches the one below:
+Download the RAID dataset from the following [link](https://huggingface.co/datasets/aimagelab/RAID) and check that the structure matches the one below:
 
 ```
 data
