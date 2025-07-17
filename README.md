@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 # Detector Training
 
-If you want to use the available pretrained models, you can directly skip to the next [step](#evaluating-and-attacking-a-detector).
+If you want to use the available pretrained models, you can directly skip to the next [step](#evaluating-and-attacking-a-detector): the checkpoints, stored in [this HuggingFace repository](https://huggingface.co/aimagelab/RAID_ckpt), will be automatically downloaded.
 
 ## Dataset Setup
 
