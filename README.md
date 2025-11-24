@@ -143,13 +143,15 @@ This research has been partially supported by the Horizon Europe projects [ELSA]
 We also acknowledge the CINECA award under the ISCRA initiative, for the availability of high-performance computing resources and support.
 
 <p align="center">
-    <img src="imgs/FundedbytheEU.png" alt="Funded by EU" style="height:80px; vertical-align: middle;"/>
+    <img src="imgs/FundedbytheEU.png" alt="Funded by EU" style="height:80px; vertical-align: middle;"/> &nbsp;&nbsp;
     <img src="imgs/elsa.jpg" alt="ELSA" style="height:80px; vertical-align: middle;"/> &nbsp;&nbsp;
-    <img src="imgs/sec4AI4sec.png" alt="Sec4AI4Sec" style="height:80px; vertical-align: middle;"/>&nbsp;&nbsp;
-    <img src="imgs/CoEvolution_Logo.svg" alt="CoEvolution" style="height:80px; vertical-align: middle;"/>
+    <img src="imgs/sec4AI4sec.png" alt="Sec4AI4Sec" style="height:80px; vertical-align: middle;"/>
 </p>
 <br>
 <p align="center">
-    <img src="imgs/SERICS.png" alt="SERICS" style="height:80px; vertical-align: middle;"/> &nbsp;&nbsp;
+    <img src="imgs/CoEvolution_Logo.svg" alt="CoEvolution" style="height:80px; vertical-align: middle;"/> &nbsp;&nbsp;
+    <img src="imgs/SERICS.png" alt="SERICS" style="height:80px; vertical-align: middle;"/>
+</p>
+<p align="center">
     <img src="imgs/SAFER_Logo.png" alt="SAFER" style="height:160px;  vertical-align: middle;"/>
 </p>
