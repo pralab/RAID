@@ -137,3 +137,17 @@ Wang2020 | [CNN-generated images are surprisingly easy to spot...for now](https:
 The provided MIT License only applies to the `raid` directory. The code
 contained in the `external` folder, provided by third-parties and modified in
 some parts, has its own licenses that are included in each subfolder.
+
+# Acknowledgements
+This research has been partially supported by the Horizon Europe projects [ELSA](https://elsa-ai.eu) (GA no. 101070617), [Sec4AI4Sec](https://www.sec4ai4sec-project.eu) (GA no. 101120393), and [CoEvolution](https://coevolution-project.eu/) (GA no. 101168560); and by [SERICS](https://serics.eu/) (PE00000014) and [FAIR](https://fondazione-fair.it/en/) (PE00000013) under the MUR NRRP funded by the EU-NGEU.
+We also acknowledge the CINECA award under the ISCRA initiative, for the availability of high-performance computing resources and support.
+
+<img src="imgs/FundedbytheEU.png" alt="Funded by EU" style="height:80px;"/>
+<img src="imgs/elsa.jpg" alt="ELSA" style="height:80px;"/> &nbsp;&nbsp;
+<img src="imgs/sec4AI4sec.png" alt="Sec4AI4Sec" style="height:80px;"/>
+<img src="imgs/CoEvolution_Logo.svg" alt="CoEvolution" style="height:80px;"/> &nbsp;&nbsp;&nbsp;&nbsp; 
+<img src="imgs/SERICS.png" alt="SERICS" style="height:80px;"/> &nbsp;&nbsp;
+<br>
+<p align="center">
+    <img src="imgs/SAFER_Logo.png" alt="SAFER" style="height:160px; text-align: center"/> &nbsp;&nbsp;
+</p>
