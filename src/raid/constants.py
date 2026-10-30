@@ -5,13 +5,17 @@ from models import (
     cavia2024,
     chen2024,
     corvi2023,
+    effort,
+    aide,
+    d3,
+    omniaid,
+    dda,
     koutlis2024,
     ojha2023,
     wang2020,
     EnsembleModel,
     vit_lp14_dinov2,
     vit_lp14_reg_dinov2,
-    vit_lp16_siglip_384,
     vit_tp16_224_augreg_in21k,
 )
 from models.ensemble.ensemble_function import (
@@ -27,7 +31,7 @@ def _get_raid_ckpt(filename):
 
 # models with default checkpoints
 MODELS = {
-    "cavia2024": (cavia2024, _get_raid_ckpt("cavia2024/model_best.pth.tar")), # retrained
+    "cavia2024": (cavia2024, _get_raid_ckpt("cavia2024/model_best.pth.tar")),
     "chen2024_convnext": (
         chen2024, _get_raid_ckpt("chen2024_convnext/16_acc0.9993.pth")
     ),
@@ -40,7 +44,11 @@ MODELS = {
     ),
     "ojha2023": (ojha2023, _get_raid_ckpt("ojha2023/model_best.pth.tar")),
     "wang2020": (wang2020, _get_raid_ckpt("wang2020/model_best.pth.tar")),
-
+    "effort": (effort, _get_raid_ckpt("effort/genimage_sd14_released.pth")),
+    "aide": (aide, _get_raid_ckpt("aide/genimage_sd14_released.pth")),
+    "d3": (d3, _get_raid_ckpt("d3/genimage_sd14_best.pth")),
+    "omniaid": (omniaid, _get_raid_ckpt("omniaid/genimage_sd14_released.pth")),
+    "dda": (dda, _get_raid_ckpt("dda/DDA_ckpt.pth")),
     "vit_lp14_dinov2": (
         vit_lp14_dinov2,
         _get_raid_ckpt("pretrained_linear/dinov2_retrain_d3/model_best.pth.tar")
@@ -48,10 +56,6 @@ MODELS = {
     "vit_lp14_reg_dinov2": (
         vit_lp14_reg_dinov2,
         _get_raid_ckpt("pretrained_linear/dinov2_reg_retrain_d3/model_best.pth.tar")
-    ),
-    "vit_lp16_siglip_384": (
-        vit_lp16_siglip_384,
-        _get_raid_ckpt("pretrained_linear/siglip_retrain_d3/model_best.pth.tar")
     ),
     "vit_tp16_224_augreg_in21k": (
         vit_tp16_224_augreg_in21k,
@@ -65,13 +69,11 @@ MODELS = {
     "ModelEnsemble" : EnsembleModel,
 
 }
-
 ENSEMBLING_STRATEGIES = {
     "raw": RawEnsembleFunction,
     "avg": AvgEnsembleFunction,
     "random": RandomEnsembleFunction
 }
-
 ENSEMBLE_LOSSES = {
     "avg_ce": AvgEnsembleLoss(),
     "ce" : CrossEntropyLoss(reduction="none"),

@@ -1,0 +1,22 @@
+#!/bin/bash
+# Copy to env_set.sh (gitignored), fill in the paths, then `source env_set.sh`.
+RAID_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RAID_ROOT="$(dirname "${RAID_SRC}")"
+export PYTHONPATH="${RAID_SRC}:${RAID_SRC}/raid:${PYTHONPATH:-}"
+
+# ── Required ──
+export TEST_PATH=/path/to/ELSA_TEST          # clean test set (real/ sd_14/ sd_21/ ...)
+export OUTPUT_DIR=/path/to/output            # adversarial datasets (.pkl)
+export EVAL_OUTPUT_DIR="${RAID_ROOT}/results/evaluate_detector"
+export RESULTS_DIR="${RAID_ROOT}/results/ablation"
+
+# ── Required for run_experiments.sh --mode additional_generators ──
+export ADDGEN_SRC=/path/to/tar_outputs       # one subfolder per generator
+# export ADDGEN_PATH=$(dirname "$TEST_PATH")/EXTERNAL_GEN
+
+# ── Optional (defaults shown) ──
+# export BATCH_SIZE=8
+# export NUM_WORKERS=4
+# export WHITEBOX_SUBSET=1000
+# export LOO_SUBSET=1000
+# export RAID_SUBSET=-1

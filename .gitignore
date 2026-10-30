@@ -180,4 +180,16 @@ ckpt/
 example_data/
 playground/
 /data/
-output
+/output
+trackers/
+
+# Machine-specific env vars for run_experiments.sh (paths) - keep only
+# env_set.sh.example tracked.
+src/env_set.sh
+
+# Local only (paper lives in Overleaf; notes kept in local archive)
+/paper/
+/CLAUDE.md
+
+env.lock.txt
+results/

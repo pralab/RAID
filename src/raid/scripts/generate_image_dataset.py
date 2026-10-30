@@ -12,16 +12,21 @@ import numpy as np
 
 
 def main(args):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+    if device.type == "cuda":
+        torch.cuda.set_device(device)
     pprint.pp(vars(args))
 
-    if torch.cuda.is_available():
+    if device.type == "cuda":
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
     if not args.dry_run:
-        ds_path = list(Path(args.path_to_adv_dataset).parts)
-        ds_path.insert(-1, 'IMAGE_DATASET')
-        output_dir = Path(*(ds_path[:-1]))
+        if args.output_dir:
+            output_dir = Path(args.output_dir)
+        else:
+            ds_path = list(Path(args.path_to_adv_dataset).parts)
+            ds_path.insert(-1, 'IMAGE_DATASET')
+            output_dir = Path(*(ds_path[:-1]))
 
         if not (output_dir.exists()):
             output_dir.mkdir(exist_ok=True, parents=True)
@@ -55,22 +60,24 @@ def main(args):
         os.makedirs(os.path.join(output_dir, k), exist_ok=True)
         imgs = [img.cpu() for imgs, _ in adv_data_loader for img in imgs]
 
-        for img, path in zip(imgs, img_paths):
+        for img, path in tqdm(zip(imgs, img_paths), total=len(img_paths), desc=k):
             pil_image = Image.fromarray((img.cpu().numpy().transpose(1, 2, 0) * 255).astype('uint8'))
             file_name = f"{path.split('/')[-1].rsplit('.', 1)[0]}_adv.png"
             img_save_path = os.path.join(output_dir, k, file_name)
 
             pil_image.save(img_save_path)
-            print(img_save_path)
 
     end_time = time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"End time: {end_time}")
+    print(f"Images saved to: {output_dir}")
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Image dataset generation from pickle file")
     parser.add_argument("--path_to_dataset", help="Directory containing the normal dataset")
     parser.add_argument("--path_to_adv_dataset", help="Directory containing the adversarial dataset")
+    parser.add_argument("--output_dir", default=None, help="Where the PNGs are written (default: <adv dataset dir>/IMAGE_DATASET)")
     parser.add_argument("--batch_size", type=int, default=10, help="Batch size for data loader")
+    parser.add_argument("--device", type=str, default="cuda:0", help="Device, e.g. cuda:1")
     parser.add_argument("--dry_run", action="store_true")
 
     return parser.parse_args()

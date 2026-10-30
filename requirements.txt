@@ -18,3 +18,12 @@ tensorboardX
 faiss-gpu==1.7.2
 scikit-image
 diffusers
+
+# AIDE
+open_clip_torch
+
+# plot
+lpips
+torchmetrics
+adjustText
+pyssim

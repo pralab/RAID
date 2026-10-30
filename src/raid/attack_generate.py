@@ -2,8 +2,9 @@ import argparse
 import pprint
 from pathlib import Path
 import torch
+import numpy as np
 from tqdm import tqdm
-from attacks import EnsemblePGD
+from attacks import EnsemblePGD, EnsembleAPGD, EnsembleCWA
 from data import get_dataloader
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion import LpPerturbationModels
@@ -20,28 +21,52 @@ import time
 import pickle
 
 from constants import MODELS, ENSEMBLING_STRATEGIES, ENSEMBLE_LOSSES
-from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, f1_score
+from sklearn.metrics import accuracy_score, roc_auc_score, f1_score
 import json
+import random
 
 
 THRESHOLD = 0.5
+ATTACK_CLASSES = {"pgd": EnsemblePGD, "apgd": EnsembleAPGD, "cwa": EnsembleCWA}
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 def main(args):
     pprint.pp(vars(args))
+    if args.random_start:
+        set_seed(args.random_seed)
 
-    if torch.cuda.is_available():
+    device_str = args.device[0] if isinstance(args.device, list) else args.device
+    if torch.cuda.is_available() and device_str.startswith("cuda"):
+        torch.cuda.set_device(device_str)
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
     if not args.dry_run:
+        # pgd (default) keeps the original "adv_raw_..." naming for backward
+        # compatibility with already-generated PGD results; apgd/cwa embed
+        # the attack name so they don't collide with PGD's directories.
+        name_prefix = args.ensembling_strategy if args.attack == "pgd" else args.attack
         output_dir = Path(
             f"{args.output_dir}/ADV/"
             f"{args.path_to_dataset.split('/')[-1]}{'_'+str(args.subset) if args.subset != -1 else ''}/"
-            f"adv_{args.ensembling_strategy}_{args.models}_{args.epsilon.replace('/','_')}"
+            f"adv_{name_prefix}_{args.models}_{args.epsilon.replace('/','_')}"
             f"_{args.num_steps}_{args.step_size}"
         )
+        # Directory existing isn't enough to call a cell "done" — a prior run
+        # can leave behind partial output (e.g. the example_*.pdf plots) and
+        # die before writing adv_dataset.pkl, which used to make this skip
+        # silently forever. When --generate is set, require the pkl itself.
+        already_done = output_dir.exists() and (
+            not args.generate or (output_dir / "adv_dataset.pkl").exists()
+        )
         if (
-            output_dir.exists()
-            and input(f"Output directory: {output_dir} exists, continue and overwrite? (y/n): ") != "y"
+            already_done
+            # and input(f"Output directory: {output_dir} exists, continue and overwrite? (y/n): ") != "y"
+            and not args.overwrite
         ):
             return
         output_dir.mkdir(exist_ok=True, parents=True)
@@ -55,7 +80,8 @@ def main(args):
             )
             if (
                 eval_output_dir.exists()
-                and input(f"Output directory: {eval_output_dir} exists, continue and overwrite? (y/n): ") != "y"
+                # and input(f"Output directory: {eval_output_dir} exists, continue and overwrite? (y/n): ") != "y"
+                and not args.overwrite
             ):
                 return
             eval_output_dir.mkdir(exist_ok=True, parents=True)
@@ -86,20 +112,23 @@ def main(args):
         device = devices[0]
     else:
         args.models = args.models[0]
-        device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+        device_str = args.device[0] if isinstance(args.device, list) else args.device
+        device = torch.device(device_str if torch.cuda.is_available() else "cpu")
         model = MODELS[args.models][0](
             MODELS[args.models][1], device=device)
 
     if args.eval_model:
-        device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+        device_str = args.device[0] if isinstance(args.device, list) else args.device
+        device = torch.device(device_str if torch.cuda.is_available() else "cpu")
         eval_model = MODELS[args.eval_model][0](
             MODELS[args.eval_model][1], device=device)
 
-    data_loaders, _ = get_dataloader(path=args.path_to_dataset, 
+    data_loaders, _ = get_dataloader(path=args.path_to_dataset,
         dataset_type=args.dataset_type,
         batch_size=args.batch_size,
         device=device,
-        subset=args.subset)
+        subset=args.subset,
+        sample_seed=args.sample_seed)
 
     #########################################################################
     #                     Creating and running the attack                   #
@@ -129,7 +158,7 @@ def main(args):
 
     # Create and run attack (PGD attack with Linf and CE loss)
     perturbation_model = LpPerturbationModels.LINF
-    y_target = 0 # Misclassify AIG images as real
+    y_target = None  # Untargeted attack: push away from ground truth
     epsilon = float(eval(args.epsilon))
     num_steps = args.num_steps
     step_size = args.step_size
@@ -138,12 +167,13 @@ def main(args):
     tensorboard_tracker = TensorboardTracker("trackers/logs/pgd", trackers)
 
     if isinstance(args.models, list):
-        native_attack = EnsemblePGD(
+        attack_cls = ATTACK_CLASSES[args.attack]
+        native_attack = attack_cls(
             perturbation_model=perturbation_model,
             epsilon=epsilon,
             num_steps=num_steps,
             step_size=step_size,
-            random_start=False,
+            random_start=True if args.random_start else False,
             loss_function=ENSEMBLE_LOSSES[loss],
             y_target=y_target,
             trackers=tensorboard_tracker,
@@ -154,7 +184,7 @@ def main(args):
             epsilon=epsilon,
             num_steps=num_steps,
             step_size=step_size,
-            random_start=False,
+            random_start=True if args.random_start else False,
             y_target=y_target,
             backend=Backends.NATIVE,
             trackers=tensorboard_tracker,
@@ -168,6 +198,7 @@ def main(args):
 
     if args.eval_model:
         all_predictions = []
+        all_probs = []
         all_p_labels = []
         all_labels = []
         all_logits = []
@@ -197,6 +228,7 @@ def main(args):
             adv_labels_list = []
         if args.eval_model:
             predictions = []
+            probs_list = []
             p_labels = []
             labels = []
 
@@ -210,6 +242,7 @@ def main(args):
                 all_logits.extend(logits_batch.cpu().tolist())
                 p_labels.extend(eval_model.predict(adv_images_b).cpu().detach())
                 probs = torch.softmax(logits_batch, dim=1)[:, 1]
+                probs_list.extend(probs.cpu().tolist())
                 predictions.extend((probs > THRESHOLD).int().cpu().tolist())
                 labels.extend(adv_labels_b.cpu().detach())
 
@@ -225,8 +258,13 @@ def main(args):
                 "acc": accuracy_score(y_true=labels, y_pred=p_labels)
                 }
             all_predictions.extend(predictions)
+            all_probs.extend(probs_list)
             all_p_labels.extend(p_labels)
             all_labels.extend(labels)
+
+        del native_adv_subset
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
     current_time = time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"Ending attack at: {current_time}")
@@ -239,8 +277,7 @@ def main(args):
         metrics['All'] = {
             "f1": f1_score(y_true=all_labels, y_pred=all_p_labels),
             "acc": accuracy_score(y_true=all_labels, y_pred=all_p_labels),
-            "auc": roc_auc_score(y_true=all_labels, y_score=all_predictions),
-            "ap": average_precision_score(y_true=all_labels, y_score=all_predictions),
+            "auc": roc_auc_score(y_true=all_labels, y_score=all_probs),
             }
         with open(f"{eval_output_dir}/results.json", "w") as f:
             json.dump(
@@ -252,6 +289,9 @@ def main(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="PGD Attack on Model Ensemble")
+    parser.add_argument("--overwrite", type=int, default=0, help="Set to 1 to overwrite existing results")
+    parser.add_argument("--random_start", type=int, default=0, help="Whether to use random start during the initilization of PGD")
+    parser.add_argument("--random_seed", type=int, help="random seed. Set only if the random start is true for PGD")
     parser.add_argument("--trained_d3", action="store_true", help="Load checkpoints trained on D3")
     parser.add_argument("--generate", action="store_true", help="Generate adversarial tensors dataset if this flag is set")
     parser.add_argument("--generate_images", action="store_true", help="Generate adversarial images dataset if this flag is set")
@@ -271,6 +311,9 @@ def parse_args():
     parser.add_argument("--num_steps", type=int, default=10, help="PGD steps number")
     parser.add_argument("--step_size", type=float, default=5e-2, help="PGD Step size")
     parser.add_argument("--subset", type=int, default=-1, help="test subset size (-1 for full test set)")
+    parser.add_argument("--sample_seed", type=int, default=None, help="Seed for random dataset subsampling (different seed = different images)")
+    parser.add_argument("--attack", type=str, default="pgd", choices=["pgd", "apgd", "cwa"],
+                        help="Ensemble attack algorithm to use (only affects ensemble/multi-model runs).")
     parser.add_argument("--ensembling_strategy", type=str, default="raw", choices=["raw", "avg", "random"],
                         help="Defines the ensembling strategy.")
     parser.add_argument("--ensemble_loss", type=str, default="avg_ce", choices=["avg_ce"],

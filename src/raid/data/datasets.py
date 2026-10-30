@@ -1,3 +1,4 @@
+import random
 from pathlib import Path
 from typing import Callable, List, Union
 import torch
@@ -17,6 +18,7 @@ def get_dataloader(
     num_workers: int = 0,
     device: Union[str, torch.device] = "cpu",
     subset: int = -1,
+    sample_seed: int = None,
 ):
     dataloaders = {}
     file_paths = {}
@@ -24,7 +26,7 @@ def get_dataloader(
 
     if dataset_type == "subfolders":
         for folder in sorted(path.iterdir()):
-            if not 'modern_generator' in str(folder.resolve()):          
+            if not 'modern_generator' in str(folder.resolve()):
                 label = 0 if folder.name == "real" else 1
                 paths = [
                     str(file)
@@ -33,8 +35,14 @@ def get_dataloader(
                 ]
                 labels = [torch.tensor(label)] * len(paths)
 
-                ds = PathDataset(paths=paths, labels=labels, transform=Compose(transform)) if (subset == -1) else (
-                Subset(PathDataset(paths=paths, labels=labels, transform=Compose(transform)), list(range(subset))))
+                full_ds = PathDataset(paths=paths, labels=labels, transform=Compose(transform))
+                if subset == -1:
+                    ds = full_ds
+                elif sample_seed is not None:
+                    indices = random.Random(sample_seed).sample(range(len(paths)), subset)
+                    ds = Subset(full_ds, indices)
+                else:
+                    ds = Subset(full_ds, list(range(subset)))
 
                 dataloaders[folder.name] = DataLoader(
                     ds,

@@ -5,8 +5,8 @@ import os
 def plot_adv_example(output_dir, orig_images, orig_labels, adv_images, adv_labels,
                      trackers, num_steps, epsilon, title="example"):
     for i in range(orig_images.shape[0]):
-        orig_image, orig_label = orig_images[i].cpu().numpy(), orig_labels[i]
-        adv_image, adv_label = adv_images[i].cpu().numpy(), adv_labels[i]
+        orig_image, orig_label = orig_images[i].cpu().detach().numpy(), orig_labels[i]
+        adv_image, adv_label = adv_images[i].cpu().detach().numpy(), adv_labels[i]
         fig, axs = plt.subplots(2, 3, figsize=(15, 10))
         axs[0, 0].imshow(orig_image.transpose(1, 2, 0))
         axs[0, 0].set_title("Original image (cropped)")

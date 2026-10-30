@@ -2,9 +2,10 @@ import torch
 from secmlt.models.data_processing.data_processing import DataProcessing
 
 
-class Vit_lp16_siglip_384PostProcess(DataProcessing):
+class EffortPostProcess(DataProcessing):
+
     def _process(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.cat([-x,x], dim=-1)
+        return x
 
     def invert(self, x: torch.Tensor) -> torch.Tensor:
         return NotImplemented

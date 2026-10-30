@@ -4,10 +4,13 @@ from .wang2020.wang2020 import wang2020
 from .koutlis2024.koutlis2024 import koutlis2024
 from .cavia2024.cavia2024 import cavia2024
 from .chen2024.chen2024 import chen2024
+from .effort.effort import effort
+from .aide.aide import aide
+from .d3.d3 import d3
+from .omniaid.omniaid import omniaid
+from .dda.dda import dda
 from .vit_lp14_dinov2.vit_lp14_dinov2 import vit_lp14_dinov2
 from .vit_lp14_reg_dinov2.vit_lp14_reg_dinov2 import vit_lp14_reg_dinov2
-from .vit_lp16_siglip_384.vit_lp16_siglip_384 import vit_lp16_siglip_384
 from .vit_tp16_224_augreg_in21k.vit_tp16_224_augreg_in21k import vit_tp16_224_augreg_in21k
-# from .wang2023.wang2023 import wang2023
 
 from .ensemble import EnsembleModel
