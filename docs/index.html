@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RAID | A Benchmark Dataset for Testing the Adversarial Robustness of AI-Generated Image Detectors</title>
+    <meta name="description" content="RAID: a benchmark dataset of 216k transferable adversarial images for testing the adversarial robustness of AI-generated image (AIGI) detectors. Computer Vision and Image Understanding, 2027.">
+    <meta name="citation_title" content="RAID: A benchmark dataset for testing the adversarial robustness of AI-generated image detectors">
+    <meta name="citation_author" content="Eddoubi, Hicham">
+    <meta name="citation_author" content="Ricker, Jonas">
+    <meta name="citation_author" content="Cocchi, Federico">
+    <meta name="citation_author" content="Sotgiu, Angelo">
+    <meta name="citation_author" content="Pintor, Maura">
+    <meta name="citation_author" content="Cornia, Marcella">
+    <meta name="citation_author" content="Baraldi, Lorenzo">
+    <meta name="citation_author" content="Fischer, Asja">
+    <meta name="citation_author" content="Biggio, Battista">
+    <meta name="citation_journal_title" content="Computer Vision and Image Understanding">
+    <meta name="citation_volume" content="274">
+    <meta name="citation_firstpage" content="105002">
+    <meta name="citation_doi" content="10.1016/j.cviu.2026.105002">
+    <meta name="citation_publication_date" content="2027">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RAID: A Benchmark Dataset for Testing the Adversarial Robustness of AI-Generated Image Detectors">
+    <meta property="og:description" content="216k transferable adversarial images for screening the adversarial robustness of AIGI detectors.">
+    <meta property="og:image" content="assets/evasion_example.jpg">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="home-page">
+      <nav class="home-nav" aria-label="Project links">
+        <a class="nav-icon-link" href="https://doi.org/10.1016/j.cviu.2026.105002" target="_blank" rel="noreferrer"><span>📄 Paper</span></a>
+        <a class="nav-icon-link" href="https://github.com/pralab/RAID" target="_blank" rel="noreferrer"><img src="assets/github.svg" alt="" aria-hidden="true"><span>Code</span></a>
+        <a class="nav-icon-link" href="https://huggingface.co/datasets/aimagelab/RAID" target="_blank" rel="noreferrer"><span>🤗 Dataset</span></a>
+        <a class="nav-icon-link" href="https://huggingface.co/aimagelab/RAID_ckpt" target="_blank" rel="noreferrer"><span>🤗 Checkpoints</span></a>
+      </nav>
+
+      <header class="hero">
+        <p class="eyebrow">Computer Vision and Image Understanding · 2027</p>
+        <h1>RAID</h1>
+        <p class="hero-sub">A Benchmark Dataset for Testing the Adversarial Robustness of AI-Generated Image Detectors</p>
+        <p class="subtitle">216k transferable adversarial images, crafted against an ensemble of seven AIGI detectors, that give a fast, worst-case robustness screen for any new detector.</p>
+      </header>
+
+      <section class="band alt">
+        <div class="section-heading">
+          <p class="eyebrow">Motivation</p>
+          <h2>Near-perfect accuracy, until someone attacks</h2>
+          <p>AI-generated images (AIGIs) have reached a quality at which humans cannot reliably tell them apart from real photos. Detectors report high accuracy, but they are rarely evaluated against an adversary. A small, bounded perturbation is enough to flip an off-the-shelf detector's decision.</p>
+        </div>
+        <figure class="figure">
+          <img src="assets/evasion_example.jpg" alt="An AI-generated image detected with 70% confidence is classified as real with 91% confidence after adding adversarial noise.">
+          <figcaption>An AIGI spread on social media in 2023. An off-the-shelf detector flags it as AI-generated; adding an adversarial perturbation makes it classified as real.</figcaption>
+        </figure>
+      </section>
+
+      <section class="band">
+        <div class="section-heading">
+          <p class="eyebrow">Method</p>
+          <h2>How RAID is built</h2>
+          <p>We start from AIGIs produced by four text-to-image models in the D<sup>3</sup> dataset (to promote diversity) and optimize adversarial perturbations against an ensemble of seven state-of-the-art detectors with different architectures (to promote transferability). Detectors under test are then evaluated on both the original and the adversarial images.</p>
+        </div>
+        <figure class="figure">
+          <img src="assets/diagram.png" alt="RAID pipeline: re-training detectors on D3, generating adversarial AIGIs with an ensemble attack, robustness evaluation on RAID.">
+        </figure>
+        <div class="stat-grid">
+          <div class="stat"><strong>216k</strong><span>adversarial images</span></div>
+          <div class="stat"><strong>3</strong><span>attacks: PGD, APGD, CWA</span></div>
+          <div class="stat"><strong>3</strong><span>budgets ε: 8, 16, 32 /255</span></div>
+          <div class="stat"><strong>4</strong><span>text-to-image generators</span></div>
+          <div class="stat"><strong>7</strong><span>detectors in the attack ensemble</span></div>
+        </div>
+      </section>
+
+      <section class="band alt">
+        <div class="section-heading">
+          <p class="eyebrow">Results</p>
+          <h2>RAID transfers to unseen detectors</h2>
+          <p>Leave-one-out evaluation: each detector is attacked with the ensemble of the other six, so it is never seen during the attack. Values are AUROC / ASR (%) on the PGD split.</p>
+        </div>
+        <div class="eps-toggle" role="tablist" aria-label="Perturbation budget">
+          <button type="button" data-eps="16" class="active">ε = 16/255</button>
+          <button type="button" data-eps="32">ε = 32/255</button>
+        </div>
+        <div class="table-wrap">
+          <table class="results">
+            <thead><tr><th>Held-out detector</th><th>Ca24†</th><th>Ch24C</th><th>Ch24CN</th><th>Co23†</th><th>K24</th><th>O23†</th><th>W20†</th></tr></thead>
+            <tbody>
+              <tr data-eps="16"><td>N − model</td><td>0.36 / 54.7</td><td>0.02 / 97.6</td><td>0.20 / 78.2</td><td>0.13 / 87.0</td><td>0.05 / 94.3</td><td>0.12 / 86.5</td><td>0.26 / 73.5</td></tr>
+              <tr data-eps="32" hidden><td>N − model</td><td>0.31 / 61.5</td><td>0.01 / 98.6</td><td>0.15 / 83.0</td><td>0.05 / 94.8</td><td>0.01 / 98.5</td><td>0.10 / 88.9</td><td>0.04 / 95.8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">† trained on the D<sup>3</sup> training set.</p>
+
+        <div class="section-heading sub">
+          <h3>Detectors outside the ensemble</h3>
+          <p>Five recent, independently trained detectors evaluated on the released RAID PNGs. AUROC on clean D<sup>3</sup> → RAID, ASR (%) as relative AUROC drop.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="results">
+            <thead><tr><th>ε</th><th>AIDE</th><th>Effort</th><th>DDD</th><th>OmniAID</th><th>DDA</th></tr></thead>
+            <tbody>
+              <tr><td>Clean</td><td>0.78</td><td>0.70</td><td>0.89</td><td>0.78</td><td>0.93</td></tr>
+              <tr><td>8/255</td><td>0.66 / 15.6</td><td>0.56 / 20.0</td><td>0.71 / 19.5</td><td>0.29 / 63.4</td><td>0.52 / 44.2</td></tr>
+              <tr><td>16/255</td><td>0.60 / 22.3</td><td>0.56 / 20.2</td><td>0.66 / 25.0</td><td>0.15 / 81.4</td><td>0.34 / 63.1</td></tr>
+              <tr><td>32/255</td><td>0.50 / 35.2</td><td>0.48 / 30.8</td><td>0.57 / 35.2</td><td>0.09 / 88.1</td><td>0.16 / 82.6</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">RAID is a one-directional screen: failure on RAID indicates a detector is not adversarially robust; passing it does not certify robustness against stronger, detector-specific attacks.</p>
+      </section>
+
+      <section class="band">
+        <div class="section-heading">
+          <p class="eyebrow">Usage</p>
+          <h2>Evaluate your detector on RAID</h2>
+          <p>Download the dataset from Hugging Face and report results on both the clean and adversarial splits, using ε = 16/255 and ε = 32/255.</p>
+        </div>
+        <article class="citation-box">
+          <pre><code>huggingface-cli download aimagelab/RAID --repo-type dataset --local-dir data/RAID</code></pre>
+          <p class="box-note">Code, detector training and evaluation scripts: <a href="https://github.com/pralab/RAID" target="_blank" rel="noreferrer">github.com/pralab/RAID</a></p>
+        </article>
+      </section>
+
+      <section class="paper-footer">
+        <h2>Authors</h2>
+        <div class="author-lines">
+          <p><span>Hicham Eddoubi<sup>1,2</sup></span><span>Jonas Ricker<sup>3</sup></span><span>Federico Cocchi<sup>4,5</sup></span></p>
+          <p><span>Angelo Sotgiu<sup>1,6</sup></span><span>Maura Pintor<sup>1,6</sup></span><span>Marcella Cornia<sup>4</sup></span></p>
+          <p><span>Lorenzo Baraldi<sup>5</sup></span><span>Asja Fischer<sup>3</sup></span><span>Battista Biggio<sup>1,6</sup></span></p>
+        </div>
+        <div class="affiliation-lines">
+          <span><sup>1</sup>University of Cagliari</span>
+          <span><sup>2</sup>Sapienza University of Rome</span>
+          <span><sup>3</sup>Ruhr University Bochum</span>
+          <span><sup>4</sup>University of Modena and Reggio Emilia</span>
+          <span><sup>5</sup>University of Pisa</span>
+          <span><sup>6</sup>CINI</span>
+        </div>
+        <article class="citation-box">
+          <h3>Citation</h3>
+          <p>If you find RAID useful, please cite:</p>
+          <pre><code>@article{eddoubi2027raid,
+  title={RAID: A Benchmark Dataset for Testing the Adversarial Robustness of AI-Generated Image Detectors},
+  author={Eddoubi, Hicham and Ricker, Jonas and Cocchi, Federico and Sotgiu, Angelo and Pintor, Maura and Cornia, Marcella and Baraldi, Lorenzo and Fischer, Asja and Biggio, Battista},
+  journal={Computer Vision and Image Understanding},
+  volume={274},
+  pages={105002},
+  year={2027},
+  doi={10.1016/j.cviu.2026.105002}
+}</code></pre>
+        </article>
+      </section>
+
+      <section class="acknowledgment-section">
+        <div class="acknowledgment-box">
+          <h3>Acknowledgments</h3>
+          <p>This work has been partly supported by the EU-funded Horizon Europe projects ELSA (GA no. 101070617), Sec4AI4Sec (GA no. 101120393), and CoEvolution (GA no. 101168560); and by the projects SERICS (PE00000014) and FAIR (PE00000013) under the MUR NRRP-NextGenEU.</p>
+          <div class="ack-logo-grid">
+            <a class="ack-logo-card" href="https://www.elsa-ai.eu/" target="_blank" rel="noreferrer"><img src="assets/elsa.jpg" alt="ELSA"></a>
+            <a class="ack-logo-card" href="https://www.sec4ai4sec-project.eu/" target="_blank" rel="noreferrer"><img src="assets/sec4AI4sec.png" alt="Sec4AI4Sec"></a>
+            <a class="ack-logo-card" href="https://coevolution-project.eu/" target="_blank" rel="noreferrer"><img src="assets/CoEvolution_Logo.svg" alt="CoEvolution"></a>
+            <a class="ack-logo-card" href="https://serics.eu/" target="_blank" rel="noreferrer"><img src="assets/SERICS.png" alt="SERICS"></a>
+            <span class="ack-logo-card"><img src="assets/FundedbytheEU.png" alt="Funded by the European Union"></span>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      document.querySelectorAll('.eps-toggle button').forEach(b => b.addEventListener('click', () => {
+        document.querySelectorAll('.eps-toggle button').forEach(x => x.classList.toggle('active', x === b));
+        document.querySelectorAll('tr[data-eps]').forEach(r => r.hidden = r.dataset.eps !== b.dataset.eps);
+      }));
+    </script>
+  </body>
+</html>
